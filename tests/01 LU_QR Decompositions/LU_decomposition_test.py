@@ -97,9 +97,9 @@ for function in lu_functions:
 
 n_b_samples = 8
 for idx, n in enumerate(sizes):
-    # A = scipy.linalg.hilbert(n)
-    A = normal_distributed_random(n)
+    A = scipy.linalg.hilbert(n)
     # A = normal_distributed_random(n)
+    # A = wilkinson_growth_matrix(n)
     b_samples = [rng.normal(size=n) for _ in range(n_b_samples)]
     for fn_idx, lu_function in enumerate(lu_functions):
         try:
@@ -140,6 +140,6 @@ for ax, data_dict, ylabel, title in metric_axes:
     ax.set_title(title)
     ax.legend()
 
-fig.suptitle("LU Decomposition Methods on Random Matrices")
+fig.suptitle("LU Decomposition Methods on Hilbert Matrices")
 fig.tight_layout()
 plt.show()

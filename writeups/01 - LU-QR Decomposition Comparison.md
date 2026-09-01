@@ -1,9 +1,4 @@
-# Markdown Note Template
-
-*note: to preview the .md files I should press ctrl+k, v*
-*to switch between the two I should press ctrl+shift+v*
-
-What each writeup should contain
+# 01 - LU and QR Decomposition Comparisons
 
 Note: here are the metrics
 QR:
@@ -20,17 +15,16 @@ LU:
 
 ## What was implemented
 
-- one paragraph, plain description, no code.
+I implemented my own versions of LU and QR decompositions in Python. For LU, this consisted of regular Gaussian Elimination and Gaussian elimination with partial pivoting. For QR, this consisted of Gram-Schmidt, modified Gram-Schmidt, and Householder. Then, I validated them against built-in versions of the same decompositions (in SciPy and NumPy respectively). The tests included a variety of different metrics across a few different kinds of matrices.
 
 ## Validation
 
-- how you know it's correct. Comparison against a known analytic solution, against scipy/numpy, or a convergence-order check. This is the most important section for a research audience. it's the difference between "I wrote code" and "I verified my code is right."
+The written code performed similarly to the built-in methods in virtually every metric for well-behaved matrices.
 
 ## The interesting numerical behavior
 
-- conditioning plots, convergence plots, error vs. N, eigenvalue distributions. This is where the actual research content lives (e.g., "Chebyshev differentiation matrix condition number grows like O(N^4)" is a finding, not a footnote).
+The QR code behaved much better for hilbert matrices than LU decomposition did. Even with partial pivoting, LU failed to find a reasonable result for n > 12. Furthermore, hilbert matrices provided the worst numerical performance of them all and QR matrices consistently had lower reconstruction and backwards errors. Runtime was also consistent across all schemes, irrelevant of matrix type.
 
 ## What surprised you or broke
 
-- genuinely valuable for a research portfolio. "I expected X, got Y, here's why" reads as more sophisticated than a clean success story, and it's honest.
-Plots, generated from a script you keep alongside the writeup so they're reproducible, not just pasted images
+I was surprised that the LU decompositions would stop working for such a low n. I was also surprised that the backwards error for the QR matrices stopped working in the solution step for all kinds of QR decompositions except for the rudimentary Gram-Schmidt. The low numerical accuracy kept the pivots above the 1e-14 threshold to be considered zeros and therefore allowed it to bypass the solution errors caused by the condition number of the Hilbert matrix.
