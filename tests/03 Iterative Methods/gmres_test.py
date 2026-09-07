@@ -7,11 +7,20 @@ from linalg import iterative
 
 rng = np.random.default_rng(seed=10)
 
-N = 5
-A = rng.normal(size=(N,N))
-A = A @ A.T # lets see how this plays
-A = scipy.linalg.hilbert(N)
-# b = np.ones((N,), dtype=np.float64) # equivalent to solving Ax = vector of ones
+def random_with_condition(n, cond_number, rng):
+    Q, _ = np.linalg.qr(rng.normal(size=(n, n)))
+    eigs = np.logspace(0, -np.log10(cond_number), n)
+    return Q @ np.diag(eigs)
+
+def random_spd_with_condition(n, cond_number, rng):
+    Q, _ = np.linalg.qr(rng.normal(size=(n, n)))
+    eigs = np.logspace(0, -np.log10(cond_number), n)
+    return Q @ np.diag(eigs) @ Q.T
+
+N = 200
+condition_number = 10
+A = random_spd_with_condition(N, condition_number, rng)
+print(np.linalg.cond(A))
 b = rng.normal(size=(N,))
 
 # solving
@@ -34,6 +43,12 @@ for i in range(N - 1):
     Qi, Hi = iterative.arnoldi_step(A, b, Q=Qi, H=Hi)
     x_i, res_i = iterative.gmres_step(A, Qi, Hi, b, x0)
     residuals[i + 1] = res_i
+
+# print the first index where the minimum was found.
+try:
+    print(np.min(np.arange(N)[residuals < residuals[-1]]))
+except:
+    print("Smallest residual was final")
 
 plt.plot(np.arange(N), np.log(residuals), label="ln(Residuals)")
 plt.hlines(np.log(residuals[-2]), xmin=0, xmax=N-1, linestyles="--", color="black", label="Penultimate residual")
