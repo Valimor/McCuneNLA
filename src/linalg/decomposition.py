@@ -101,6 +101,8 @@ def compute_householder_QR(A):
         R[k:,k:] = h_small @ R[k:,k:]
         Q[:,k:] = Q[:,k:] @ h_small
 
+    # tolerance because the e-14 are bothering me
+    R[np.abs(R) < 1e-14] = 0
     return Q, R
 
 """

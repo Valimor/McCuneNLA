@@ -3,7 +3,7 @@ import time
 import matplotlib.pyplot as plt
 import scipy
 
-from linalg import QR_LU_Decomposition as decomp
+from linalg import decomposition as decomp
 
 seed = 42
 rng = np.random.default_rng(seed)

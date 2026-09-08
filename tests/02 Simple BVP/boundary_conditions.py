@@ -2,7 +2,7 @@ import numpy as np
 import scipy
 import matplotlib.pyplot as plt
 
-from linalg import QR_LU_Decomposition as decomp
+from linalg import decomposition as decomp
 
 def chebyshev_diff_matrix(N):
     """
