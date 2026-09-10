@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 import time
 
 from linalg import iterative
+from linalg import decomposition
 
 rng = np.random.default_rng(seed=10)
 
