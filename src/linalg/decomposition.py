@@ -105,6 +105,22 @@ def compute_householder_QR(A):
     R[np.abs(R) < 1e-14] = 0
     return Q, R
 
+def compute_householder_hessenberg(A):
+    n = A.shape[0]
+    Q = np.eye(n, dtype=np.float64)
+    H = np.copy(A)
+
+    # do a series of reflections to zero out the below-diagonal elements
+    for k in range(n - 2):
+        h_small = compute_h_small(H[k+1:,k])
+        H[k+1:,k:] = h_small @ H[k+1:,k:]
+        H[:,k+1:] = H[:,k+1:] @ h_small.T
+        Q[:,k+1:] = Q[:,k+1:] @ h_small
+
+    # tolerance because the e-14 are bothering me
+    H[np.abs(H) < 1e-14] = 0
+    return Q, H
+
 """
 =====================================================================================
 SOLVERS

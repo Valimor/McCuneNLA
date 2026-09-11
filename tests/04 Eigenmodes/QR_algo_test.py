@@ -9,10 +9,10 @@ from linalg import iterative
 
 rng = np.random.default_rng(seed=20)
 
-n = 4
+n = 50
 R = rng.normal(size=(n,n))
-Q, _ = decomp.compute_householder_QR(R)
 
+"""
 # bet
 # M = Q.T @ np.diag([3.0, 1.5, 1.2, 1.1, 0.5, 0.7]) @ Q
 theta = np.pi/3
@@ -31,3 +31,12 @@ steps = 100
 A = np.copy(M)
 evals, evecs = eigen.QR_eigen_algorithm(A)
 print(evals)
+"""
+t0 = time.time()
+evals_g, evecs_g = eigen.QR_eigen_givens_algorithm(R) # look totally wrong
+t1 = time.time()
+evals_h, evecs_h = eigen.QR_eigen_algorithm(R)
+t2 = time.time()
+
+print(f"Eigenvalues for givens took {t1 - t0}")
+print(f"Eigenvalues for standard QR took {t2 - t1}")

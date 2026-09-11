@@ -29,7 +29,7 @@ def chebyshev_diff_matrix(N):
 
     return D, x
 
-N = 32 # i like
+N = 256 # i like
 
 I = np.eye(N + 1)
 D, x = chebyshev_diff_matrix(N)
