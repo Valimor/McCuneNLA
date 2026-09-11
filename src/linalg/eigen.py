@@ -2,7 +2,7 @@ import numpy as np
 
 # my prewritten stuff
 import linalg.decomposition as decomp
-import linalg.iterative
+import linalg.iterative as iterative
 
 """
 ====================================================================================
@@ -185,9 +185,14 @@ def QR_eigen_step_shifted_givens(A, Q_total=None, m=None):
     return A, Q_total
 
 def QR_eigen_givens_algorithm(A, tol=1e-10, max_steps=500):
-    # find the hessenberg decomposition for easier computation
-    Q_total, H = decomp.compute_householder_hessenberg(A.copy())
     n = A.shape[0]
+    if np.abs(np.tril(A, -2)).max() < tol:
+        # check if hessenberg
+        Q_total = np.eye(n)
+        H = A.copy()
+    else:
+        # find the hessenberg decomposition for easier computation
+        Q_total, H = decomp.compute_householder_hessenberg(A.copy())
     m = n
     
     eigenvalues = []
@@ -232,6 +237,26 @@ IMPLICIT QR FUNCTIONS
 ARNOLDI FUNCTIONS
 ====================================================================================
 """
+
+# question: can this be reduced simply?
+# like can I find the eigenvalues 1 at a time instead of in bulk...
+def get_n_eigenmodes_arnoldi(A, n):
+    # intialize b. this is arbitrary for now. there is probably a way to optimize it!
+    b = np.ones((n,), dtype=np.float64)
+
+    # compute the n-dimensional arnoldi decomposition
+    Q, H = iterative.arnoldi_iteration(A, b, n)
+    if H.shape[0] != H.shape[1]:
+        H_square = H[:-1,:].copy()
+        Q_reshaped = Q[:,:-1].copy()
+    else:
+        H_square = H.copy()
+        Q_reshaped = Q.copy()
+    ritz_values, ritz_vecs = QR_eigen_givens_algorithm(H_square)
+
+    approx_evecs = Q_reshaped @ ritz_vecs
+
+    return ritz_values, approx_evecs
 
 # TODO:
 # 1. implement a version of this that first transforms the matrix to upper hessenberg form
