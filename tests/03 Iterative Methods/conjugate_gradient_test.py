@@ -13,6 +13,7 @@ def random_spd_with_condition(n, cond_number, rng):
 rng = np.random.default_rng(seed=10)
 
 N = 100
+c_padding = 10
 cond_numbers = np.logspace(0, 8, 15)  # κ from 10^0 to 10^8
 
 iters_to_converge = []
@@ -25,7 +26,7 @@ residual_histories = {}
 for idx, k in enumerate(cond_numbers):
     A = random_spd_with_condition(N, cond_number=k, rng=rng)
     b = rng.normal(size=N)
-    x_cg, residuals = iterative.conj_gradient(A, b, tol=1e-10, convergence_padding=10)
+    x_cg, residuals = iterative.conj_gradient(A, b, tol=1e-10, convergence_padding=c_padding)
     iters_to_converge.append(len(residuals))
     final_residuals.append(residuals[-1])
     if idx in selected_indices:
@@ -35,8 +36,9 @@ plt.figure()
 plt.semilogx(cond_numbers, iters_to_converge, 'o-', label="Empirical")
 plt.xlabel("Condition number κ")
 plt.ylabel("Iterations to converge")
-plt.title("Condition number vs. Iterations for Convergence")
-plt.legend()
+plt.title("CJ Condition number vs. Iterations for Convergence")
+plt.hlines(c_padding * N, xmin = cond_numbers[0], xmax = cond_numbers[-1], label="Max iterations", linestyles="--", colors="black")
+plt.legend(loc="lower right")
 plt.show()
 
 plt.figure()
@@ -44,6 +46,6 @@ for k, hist in residual_histories.items():
     plt.semilogy(hist, label=f"κ={k:.0e}")
 plt.xlabel("Iteration")
 plt.ylabel("Residual norm")
-plt.title("Error vs. Iteration for different Condition Numbers")
+plt.title("CJ Error vs. Iteration")
 plt.legend()
 plt.show()

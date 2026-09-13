@@ -23,15 +23,10 @@ The code behaved as expected for all of the above methods. In other words, Jacob
 
 It was interesting to me how a solution to the full-rank system was so closely approximated by a non-full rank solution (in the case of the Krylov subspace methods). These methods clearly failed at lower dimensions, so I found it fascinating that the generalization to higher dimensions is easily able to capture most of the behavior.
 
+It was also interesting how the Krylov subspace methods were so much more robust than the naive iterative methods. It showed how the non-krylov subspace methods were simply worse, as they took more computation, had more stringent requirements to be used, and did not proide any other useful computation. In contrast, conjugate gradient and gmres can both be easily used to compute the krylov subspace (with gmres directly using the Arnoldi iteration that is used to approximate the eigenmodes in the next section).
+
 ## What surprised you or broke
 
 I was surprised at how poorly behaved a normally-distributed $N\times N$ matrix was for $N$ greater than 10. I knew that the condition number grew very rapidly, but this was a good demonstration of how poorly it really behaved. For the least robust methods, most of the time it outright failed to converge. Even in the most robust (GMRes), it only converged to near machine precision on the very last step.
 
-I was also surprised by how even the Krylov subspace methods were not immune to the effects of conditioning. For $N=10$, the hilbert matrix led to significant errors in GMRes and Conjugate gradient.
-
-## TODO: make the plots FR. I know this is the most boring part but it's good for reflection
-
-Plots to make
-
-- residual vs step for many different matrices (lowkey that's it)
-- ok i can do this later
+I was also surprised by how even the Krylov subspace methods were not immune to the effects of conditioning. For $N=10$, the hilbert matrix led to significant errors in GMRes and Conjugate gradient. However, for the high-condition numbered matrices, GMRES performed better (in terms of residual norm error) than Conjugate Gradient.

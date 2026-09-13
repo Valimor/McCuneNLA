@@ -14,9 +14,9 @@ I also used the written QR algorithms to find the roots of polynomials. By const
 
 Rate of convergence of the QR algorithm was much slower than the equivalent with all the shifting, deflation, and givens rotations. [todo: make a ]
 
+Arnoldi iteration provided a shockingly accurate approximation to the tpomost eigenvalues at low dimension of the krylov subspace. As shown in the gifs in the figures section, the approximation to the eigenvalues converges very rapidly to the numpy-derived eigenvalues, especially for the uppermost in magnitude. The ones that were closer to zero tended not to appear on first pass, and the program converged to them much more slowly.
 
-1. Arnoldi iteration provided a shockingly accurate approximation to the tpomost eigenvalues at low dimension of the krylov subspace.
-2. Polynomial root finding was not as accurate as I expected, with error around 1e-4 for the known polynomial $(x+1)^4=0$
+[convergence for ill conditioned matrices...]
 
 ## What surprised you or broke
 

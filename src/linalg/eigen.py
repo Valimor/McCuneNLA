@@ -247,8 +247,6 @@ def QR_eigen_givens_algorithm(A, tol=1e-10, max_steps=500,convergence_diagnostic
         return np.array(eigenvalues), np.array(eigenvectors).T, steps
     return np.array(eigenvalues), np.array(eigenvectors).T # transpose so columns!
 
-
-
 """
 ====================================================================================
 IMPLICIT QR FUNCTIONS
@@ -288,6 +286,7 @@ def get_n_eigenmodes_arnoldi(A, m):
 
 # question: can I make a version of this that solves for $m$ eigenmodes at a time?
 #   1. Apply arnoldi iteration to find $m$ eigenmodes within some given accuracy
+#       - idk if this is possible, but i can do 
 #   2. rotate them away and repeat!
 
 # TODO:
