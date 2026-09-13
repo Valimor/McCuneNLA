@@ -22,6 +22,7 @@ n = 100
 M = random_spd_bigger_eigs(n, 1, 10, rng)
 A = np.copy(M)
 
+"""
 # intialize b. this is arbitrary for now
 b = np.ones((n,), dtype=np.float64)
 
@@ -36,6 +37,9 @@ else:
 ritz_values, ritz_vecs = eigen.QR_eigen_givens_algorithm(H_square)
 
 approx_evecs = Q_reshaped @ ritz_vecs
+"""
+
+ritz_values, approx_evecs = eigen.get_n_eigenmodes_arnoldi(A, 50)
 
 # check error for H_square
 eigenmode_check(A, ritz_values, approx_evecs)

@@ -19,7 +19,7 @@ Keep a consistent skeleton so they're fast to write and easy to compare across m
 
 - conditioning plots, convergence plots, error vs. N, eigenvalue distributions. This is where the actual research content lives (e.g., "Chebyshev differentiation matrix condition number grows like O(N^4)" is a finding, not a footnote).
 
-## What surprised you or broke
+## What surprised me or broke
 
 - genuinely valuable for a research portfolio. "I expected X, got Y, here's why" reads as more sophisticated than a clean success story, and it's honest.
 Plots, generated from a script you keep alongside the writeup so they're reproducible, not just pasted images

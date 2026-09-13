@@ -21,12 +21,15 @@ def QR_eigen_step(A, Q_total=None):
     return A, Q_total
 
 # the idea is to use A - muI to converge faster
-def QR_eigen_step_shifted(A, Q_total=None, m=None):
+def QR_eigen_step_shifted(A, Q_total=None, m=None, convergence_diagnostic=False):
     if m is None:
         m = A.shape[0]
     Asub = A[:m, :m]
     mu = Asub[-1, -1]
-    Q, R = decomp.compute_householder_QR(Asub - mu * np.eye(m))
+    if convergence_diagnostic:
+        k = Asub.shape[0] # number of loops in the householder decomp.
+        steps = (k * (k - 1))//2 # because it applies to the entire triangle
+    Q, R  = decomp.compute_householder_QR(Asub - mu * np.eye(m))
     Asub_new = R @ Q + mu * np.eye(m)
     A = A.copy()
     A[:m, :m] = Asub_new
@@ -36,7 +39,10 @@ def QR_eigen_step_shifted(A, Q_total=None, m=None):
         Q_full[:m, :m] = Q
         Q_total = Q_total @ Q_full
 
-    return A, Q_total
+    if convergence_diagnostic:
+        return A, Q_total, steps
+    else:
+        return A, Q_total
 
 def get_evals_from_2x2(A, tol=1e-12):
     n = A.shape[0]
@@ -80,7 +86,7 @@ def reduce_2x2_block_to_complex(A, Q_total, m=None):
     return (lam1, v1), (lam2, v2)
 
 # note: this is the simplest version and it takes a long time to converge
-def QR_eigen_algorithm(A, tol=1e-10, max_steps=500):
+def QR_eigen_algorithm(A, tol=1e-10, max_steps=500, convergence_diagnostic=False):
     n = A.shape[0]
     A = A.copy() # defensive copy
     Q_total = np.eye(n)
@@ -90,6 +96,8 @@ def QR_eigen_algorithm(A, tol=1e-10, max_steps=500):
     eigenvalues = []
     eigenvectors = []
 
+    steps = 0
+
     while m > 0:
         if m == 1:
             eigenvalues.append(A[0, 0])
@@ -98,7 +106,11 @@ def QR_eigen_algorithm(A, tol=1e-10, max_steps=500):
             continue
 
         for _ in range(max_steps):
-            A, Q_total = QR_eigen_step_shifted(A, Q_total, m)
+            if convergence_diagnostic:
+                A, Q_total, step_increment = QR_eigen_step_shifted(A, Q_total, m, convergence_diagnostic=convergence_diagnostic)
+                steps += step_increment
+            else:
+                A, Q_total = QR_eigen_step_shifted(A, Q_total, m)
             if abs(A[m-1, m-2]) < tol:
                 break  # trailing 1x1 has converged
 
@@ -112,6 +124,8 @@ def QR_eigen_algorithm(A, tol=1e-10, max_steps=500):
             eigenvectors.extend([v1, v2])
             m -= 2        # trailing 2x2 block (likely complex pair), deflate both at once
 
+    if convergence_diagnostic:
+        return np.array(eigenvalues), np.array(eigenvectors).T, steps
     return np.array(eigenvalues), np.array(eigenvectors).T # transpose so columns!
 
 """
@@ -167,13 +181,15 @@ def hessenberg_qr_step(H):
         apply_givens_right(A_new, i, c, s)
     return A_new, rotations
 
-def QR_eigen_step_shifted_givens(A, Q_total=None, m=None):
+def QR_eigen_step_shifted_givens(A, Q_total=None, m=None, convergence_diagnostic=False):
     if m is None:
         m = A.shape[0]
     Asub = A[:m, :m]
     mu = Asub[-1, -1]
     shifted = Asub - mu * np.eye(m)
     Asub_new_unshifted, rotations = hessenberg_qr_step(shifted)
+    if convergence_diagnostic:
+        steps = Asub.shape[0]
     Asub_new = Asub_new_unshifted + mu * np.eye(m)
     A = A.copy()
     A[:m, :m] = Asub_new
@@ -182,9 +198,11 @@ def QR_eigen_step_shifted_givens(A, Q_total=None, m=None):
         Q_sub = Q_total[:, :m]
         for rotation in rotations:
             apply_givens_right(Q_sub, *rotation)
+    if convergence_diagnostic:
+        return A, Q_total, steps
     return A, Q_total
 
-def QR_eigen_givens_algorithm(A, tol=1e-10, max_steps=500):
+def QR_eigen_givens_algorithm(A, tol=1e-10, max_steps=500,convergence_diagnostic=False):
     n = A.shape[0]
     if np.abs(np.tril(A, -2)).max() < tol:
         # check if hessenberg
@@ -198,6 +216,8 @@ def QR_eigen_givens_algorithm(A, tol=1e-10, max_steps=500):
     eigenvalues = []
     eigenvectors = []
 
+    steps = 0
+
     while m > 0:
         if m == 1:
             eigenvalues.append(H[0, 0])
@@ -206,7 +226,11 @@ def QR_eigen_givens_algorithm(A, tol=1e-10, max_steps=500):
             continue
 
         for _ in range(max_steps):
-            H, Q_total = QR_eigen_step_shifted_givens(H, Q_total, m)
+            if convergence_diagnostic:
+                H, Q_total, steps_increment = QR_eigen_step_shifted_givens(H, Q_total, m, convergence_diagnostic=convergence_diagnostic)
+                steps += steps_increment
+            else:
+                H, Q_total = QR_eigen_step_shifted_givens(H, Q_total, m)
             if abs(H[m-1, m-2]) < tol:
                 break  # trailing 1x1 has converged
 
@@ -219,7 +243,8 @@ def QR_eigen_givens_algorithm(A, tol=1e-10, max_steps=500):
             eigenvalues.extend([lam1, lam2])
             eigenvectors.extend([v1, v2])
             m -= 2        # trailing 2x2 block (likely complex pair), deflate both at once
-
+    if convergence_diagnostic:
+        return np.array(eigenvalues), np.array(eigenvectors).T, steps
     return np.array(eigenvalues), np.array(eigenvectors).T # transpose so columns!
 
 
@@ -240,12 +265,15 @@ ARNOLDI FUNCTIONS
 
 # question: can this be reduced simply?
 # like can I find the eigenvalues 1 at a time instead of in bulk...
-def get_n_eigenmodes_arnoldi(A, n):
+# this is referred to as Restarted Arnoldi Iteration.
+# one option is Implicity Restarted Arnoldi Method. check what this is - might be different.
+def get_n_eigenmodes_arnoldi(A, m):
     # intialize b. this is arbitrary for now. there is probably a way to optimize it!
+    n = A.shape[0]
     b = np.ones((n,), dtype=np.float64)
 
     # compute the n-dimensional arnoldi decomposition
-    Q, H = iterative.arnoldi_iteration(A, b, n)
+    Q, H = iterative.arnoldi_iteration(A, b, m)
     if H.shape[0] != H.shape[1]:
         H_square = H[:-1,:].copy()
         Q_reshaped = Q[:,:-1].copy()
@@ -258,13 +286,17 @@ def get_n_eigenmodes_arnoldi(A, n):
 
     return ritz_values, approx_evecs
 
+# question: can I make a version of this that solves for $m$ eigenmodes at a time?
+#   1. Apply arnoldi iteration to find $m$ eigenmodes within some given accuracy
+#   2. rotate them away and repeat!
+
 # TODO:
-# 1. implement a version of this that first transforms the matrix to upper hessenberg form
+# 1. implement a version of this that first transforms the matrix to upper hessenberg form: DONE
 #   the use the existing methods on that
 #   a. shift
 #   b. sequence of givens rotations to zero out (i + 1, i) for the shifted matrix
 #   c. multiply R by the givens rotations on the right
 #   d. undo the shift
-# 2. implement an implicit QR algorithm
+# 2. implement an implicit QR algorithm: TODO
 #   a. bulge-chasing algorthim.
-# 3. implement Arnoldi on top of the existing algorithms
+# 3. implement Arnoldi on top of the existing algorithms: DONE
