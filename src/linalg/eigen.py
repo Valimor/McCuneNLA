@@ -299,3 +299,26 @@ def get_n_eigenmodes_arnoldi(A, m):
 # 2. implement an implicit QR algorithm: TODO
 #   a. bulge-chasing algorthim.
 # 3. implement Arnoldi on top of the existing algorithms: DONE
+
+
+"""
+====================================================================================
+GENERALIZED EIGENVALUE PROBLEM
+====================================================================================
+"""
+
+def generalized_eigen(K, M):
+    # solving Kv = \lambda Mv  (works if they are reversed, just returns the reciprocals)
+    L = decomp.compute_cholesky(M)
+
+    # this uses the age-old mantra from NLA. "don't invert, solve"
+    # it's faster and removes a layer of roundoff error
+    Y = decomp.solve_triangular_matrix(L, K, lower=True) 
+    A_reduced = decomp.solve_triangular_matrix(L, Y.T, lower=True).T
+
+    # now finding the eigenmodes of the reduced matrix
+    eigvals, w = QR_eigen_givens_algorithm(A_reduced)
+
+    # recover c = L^{-T} w, again via solving, not inverting
+    c = decomp.solve_triangular_matrix(L.T, w, lower=False)
+    return eigvals, c

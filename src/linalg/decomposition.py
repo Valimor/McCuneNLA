@@ -121,6 +121,18 @@ def compute_householder_hessenberg(A):
     H[np.abs(H) < 1e-14] = 0
     return Q, H
 
+def compute_cholesky(M):
+    # NOTE: returns a lower triangular L
+    # if cholesky fails then that's a callout that something went wrong before
+    # it only works on SPD matrices - that's not a problem!
+    n = M.shape[0]
+    L = np.zeros_like(M, dtype=np.float64)
+    for j in range(n):
+        L[j,j] = np.sqrt(M[j,j] - L[j,:j] @ L[j,:j])
+        for i in range(j+1, n):
+            L[i,j] = (M[i,j] - L[i,:j] @ L[j,:j]) / L[j,j]
+    return L
+
 """
 =====================================================================================
 SOLVERS
@@ -143,6 +155,13 @@ def solve_triangular(T, b, lower=True):
             x[i] = (b[i] - T[i, i+1:] @ x[i+1:]) / T[i, i]
 
     return x
+
+def solve_triangular_matrix(T, B, lower=True):
+    n, m = B.shape
+    X = np.zeros_like(B, dtype=np.float64)
+    for j in range(m):
+        X[:, j] = solve_triangular(T, B[:, j], lower=lower)
+    return X
 
 def solve_LU(LU, b, P=None):
     n = len(b)
@@ -170,6 +189,9 @@ def solve_QR(Q, R, b):
 
 # TODO: come back to banded matrices
 # chebyshev matrices are not banded
+
+# TODO: singular value decomposition, cholesky
+#   - both might be useful for generalized eigenvalue problem
 
 """
 =====================================================================================

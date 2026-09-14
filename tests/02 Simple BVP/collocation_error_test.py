@@ -3,31 +3,7 @@ import scipy
 import matplotlib.pyplot as plt
 
 from linalg import decomposition as decomp
-
-def chebyshev_diff_matrix(N):
-    """
-    Returns the (N+1)x(N+1) Chebyshev differentiation matrix D
-    and the Chebyshev points x, on [-1, 1].
-    """
-    if N == 0:
-        return np.array([[0.0]]), np.array([1.0])
-
-    j = np.arange(N + 1)
-    x = np.cos(np.pi * j / N)
-
-    c = np.ones(N + 1)
-    c[0] = 2
-    c[-1] = 2
-    c *= (-1.0) ** j
-
-    X = np.tile(x, (N + 1, 1)).T          # each column is a copy of x
-    dX = X - X.T                           # dX[i,j] = x[i] - x[j]
-
-    D = np.outer(c, 1.0 / c) / (dX + np.eye(N + 1))  # off-diagonal entries
-    np.fill_diagonal(D, 0)
-    np.fill_diagonal(D, -np.sum(D, axis=1))           # diagonal entries
-
-    return D, x
+from spectral import chebyshev
 
 # functions
 def rescaled_sin(x):
@@ -104,7 +80,7 @@ errors_dict = {
 
 for idx, size in enumerate(sizes):
 
-    D, x = chebyshev_diff_matrix(size)
+    D, x = chebyshev.chebyshev_diff_matrix(size)
     D2 = D @ D
 
     # add dirichlet BC
