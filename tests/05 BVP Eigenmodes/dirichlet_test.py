@@ -4,10 +4,6 @@ import matplotlib.pyplot as plt
 from spectral import chebyshev as cv
 from linalg import eigen
 
-# these are all for −u"=λu
-# checking dirichlet boundary conditions
-# u(\pm 1) = 0
-
 N = 64
 D, x = cv.chebyshev_diff_matrix(N)
 D2 = D @ D

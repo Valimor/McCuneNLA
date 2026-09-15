@@ -71,6 +71,31 @@ def build_neumann_basis(x, n_basis):
     return Phi
 
 def build_neumann_basis_dp(x, n_basis, D):
-    Phi = build_neumann_basis(x, n_basis)
+    Phi = build_neumann_basis(x, n_basis, D)
     D2 = D @ D
     return D2 @ Phi 
+
+def clenshaw_curtis_weights(N):
+    """
+    Returns quadrature weights w (length N+1) for the Chebyshev points
+    x_j = cos(j*pi/N), j = 0,...,N, such that
+        integral_{-1}^{1} f(x) dx  ≈  sum_j w_j f(x_j)
+    """
+    theta = np.pi * np.arange(N + 1) / N
+    w = np.zeros(N + 1)
+
+    # standard Clenshaw-Curtis weight formula via a cosine sum
+    for j in range(N + 1):
+        s = 0.0
+        for k in range(1, N // 2 + 1):
+            c = 2.0 if 2 * k != N else 1.0
+            s += c / (4 * k**2 - 1) * np.cos(2 * k * theta[j])
+        w[j] = 1.0 - s
+
+    # endpoint and interior scaling
+    w /= N
+    w[0] /= 2
+    w[-1] /= 2
+    w *= 2  # overall factor from the [-1,1] interval
+
+    return w

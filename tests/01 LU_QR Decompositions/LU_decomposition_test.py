@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 import scipy
 
 from linalg import decomposition as decomp
+from testing import test_matrices
 
 seed = 42
 rng = np.random.default_rng(seed)
@@ -30,23 +31,6 @@ def lu_backwards_error(A, LU, perm, b_samples):
         residual = A @ x_hat - b
         errors.append(np.linalg.norm(residual) / (np.linalg.norm(A) * np.linalg.norm(x_hat) + np.linalg.norm(b)))
     return np.mean(errors)
-
-def wilkinson_growth_matrix(n):
-    A = np.eye(n)
-    A[np.tril_indices(n, -1)] = -1
-    A[:, -1] = 1
-    return A
-
-def pivot_triggering_matrix(n, seed=0):
-    rng_local = np.random.default_rng(seed)
-    A = rng_local.normal(size=(n, n))
-    A[0, 0] = 1e-8
-    A[-1, 0] = 8.0
-    return A
-
-def normal_distributed_random(n):
-    return rng.normal(size=(n, n))
-
 # --- Uniform wrappers: every method returns (LU_combined, L, U, perm) ---
 
 def run_no_pivot(A):

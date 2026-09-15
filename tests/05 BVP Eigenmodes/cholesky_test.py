@@ -3,10 +3,7 @@ import matplotlib.pyplot as plt
 
 from linalg import decomposition as decomp
 
-def random_spd_with_condition(n, cond_number, rng):
-    Q, _ = np.linalg.qr(rng.normal(size=(n, n)))
-    eigs = np.logspace(0, -np.log10(cond_number), n)
-    return Q @ np.diag(eigs) @ Q.T
+from testing import test_matrices
 
 rng = np.random.default_rng(seed=10)
 
@@ -16,7 +13,7 @@ errors = np.zeros((ns.shape[0], conds.shape[0]), dtype=np.float64)
 for i, n in enumerate(ns):
     print(n)
     for j, cond in enumerate(conds):
-        M = random_spd_with_condition(n, cond, rng)
+        M = test_matrices.random_spd_with_condition(n, cond, rng)
         L = decomp.compute_cholesky(M)
 
         errors[i,j] = np.linalg.norm(L @ L.T - M)
