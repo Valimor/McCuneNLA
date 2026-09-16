@@ -64,7 +64,7 @@ def build_mixed_basis(x, n_basis):
         Phi[:, k] = phi_k / np.linalg.norm(phi_k)
     return Phi
 
-def build_robin_basis(x, alpha, n_basis):
+def build_robin_basis(x, n_basis, alpha=0.0):
     # robin boundary conditions u(-1) = 0, u'(1) + \alpha u'(1) = 0
     n_points = len(x)
     theta = np.arccos(x)
@@ -86,6 +86,10 @@ def build_robin_basis(x, alpha, n_basis):
 # use scipy.optimize.brentq to validate a solution for this
 
 # next, sturm-liouville stuff
+#−(p(x)u′)′+q(x)u=λw(x)u,
+# u(±1)=0. this is dirichlet with a harder problem.
+# D @ (P @ D) @ u + Q @ u = λ W @ u
+# generalized_eign(Phi.T @ (D @ P @ D + Q) @ Phi, Phi.T @ W @ Phi)
 
 def clenshaw_curtis_weights(N):
     """

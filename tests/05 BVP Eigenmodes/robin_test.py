@@ -16,15 +16,31 @@ low_k = 4
 w = cv.clenshaw_curtis_weights(N)
 W = np.diag(w)
 
-def fix_sign_by_continuity(mode, previous_mode):
-    if previous_mode is None:
-        return mode
-    if np.dot(mode, previous_mode) < 0:
-        return -mode
+# Locate a point near x = -1, shifted slightly inward (away from the
+# boundary) so the derivative estimate is well-behaved for every alpha,
+# regardless of whether the Chebyshev grid is stored ascending or
+# descending.
+_ascending = x[1] > x[0]
+_idx_m1 = np.argmin(np.abs(x - (-1.0)))
+_offset = 20
+_idx_slope_check = _idx_m1 + _offset if _ascending else _idx_m1 - _offset
+_idx_slope_check = int(np.clip(_idx_slope_check, 0, len(x) - 1))
+
+def fix_sign_by_slope(mode):
+    """Orient the mode so its slope near x = -1 is positive.
+
+    This is a fixed convention evaluated independently for every alpha
+    (not relative to the previous frame), so consecutive frames can't
+    drift or jump even if eigenvalues swap order or a continuity check
+    point happens to sit near a node.
+    """
+    deriv = D @ mode
+    if deriv[_idx_slope_check] < 0:
+        mode = -mode
     return mode
 
-def compute_low_modes(alpha, previous_modes=None):
-    Phi = cv.build_robin_basis(x, alpha, n_basis)
+def compute_low_modes(alpha):
+    Phi = cv.build_robin_basis(x, n_basis, alpha)
     Phi_xx = D2 @ Phi
 
     K = -1 * Phi.T @ W @ Phi_xx
@@ -40,28 +56,12 @@ def compute_low_modes(alpha, previous_modes=None):
     eigvecs_low = eigvecs_sorted[:, :low_k]
 
     modes = []
-    for i, (eigval, eigvec) in enumerate(zip(eigvals_low, eigvecs_low.T)):
+    for eigval, eigvec in zip(eigvals_low, eigvecs_low.T):
         reconstructed = Phi @ eigvec
         reconstructed /= np.linalg.norm(reconstructed)
-
-        prev = previous_modes[i][1] if previous_modes is not None else None
-        reconstructed = fix_sign_by_continuity(reconstructed.real, prev)
-
+        reconstructed = fix_sign_by_slope(reconstructed.real)
         modes.append((eigval.real, reconstructed))
     return modes
-
-alphas = np.concatenate([
-    np.linspace(0.0, 2.0, 40),
-    np.linspace(2.0, 20.0, 30)
-])
-
-# build history sequentially, each frame's sign chosen relative to the previous frame
-history = []
-prev_modes = None
-for a in alphas:
-    modes = compute_low_modes(a, prev_modes)
-    history.append(modes)
-    prev_modes = modes
 
 # sweep alpha over a meaningful range: from Neumann-like (alpha -> 0)
 # to strongly Robin/Dirichlet-like (large alpha)
