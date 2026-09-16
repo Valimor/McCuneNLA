@@ -10,7 +10,7 @@ D, x = cv.chebyshev_diff_matrix(N)
 D2 = D @ D
 
 n_basis = 64
-Phi = cv.build_dirichlet_basis(x, n_basis)   # self-normalized (unit-norm columns), as originally written
+Phi = cv.build_mixed_basis(x, n_basis)   # self-normalized (unit-norm columns), as originally written
 Phi_xx = D2 @ Phi   # first derivative only, not second. integration by parts. possible only for neumann
 
 w = cv.clenshaw_curtis_weights(N)
@@ -37,11 +37,11 @@ for n, (eigval, eigvec) in enumerate(zip(eigvals_low, eigvecs_low.T)):
         reconstructed_eigvec = -reconstructed_eigvec
     plt.plot(x, reconstructed_eigvec, label=f"$\\lambda$ = {eigval:.3f}")
 
-    analytic = np.sin((n+1) * np.pi/2 * (x+1))
+    analytic = np.sin((2*n+1) * np.pi/4 * (x+1))
     analytic /= np.linalg.norm(analytic)              # same normalization convention
     if np.sign(analytic[8]) != np.sign(reconstructed_eigvec[8]): # avoiding zero
         analytic *= -1
-    plt.plot(x, analytic, "--", label=f"Analytic $\\lambda$ = {(np.pi * (n+1)/2) ** 2:.3f}") 
-plt.title("Dirichlet eigenmodes with Clenshaw-Curtis")   
+    plt.plot(x, analytic, "--", label=f"Analytic $\\lambda$ = {(np.pi * (2*n+1)/4) ** 2:.3f}") 
+plt.title("Mixed eigenmodes with Clenshaw-Curtis")   
 plt.legend()
 plt.show()

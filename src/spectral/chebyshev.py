@@ -41,25 +41,7 @@ def build_dirichlet_basis(x, n_basis):
         Phi[:, k] = np.cos(k * theta) - np.cos((k + 2) * theta)
     return Phi
 
-def build_dirichlet_basis_dp(x, n_basis, D):
-    Phi = build_dirichlet_basis(x, n_basis)
-    D2 = D @ D
-    return D2 @ Phi 
-
-# next step is neumann
-# u'(\pm 1) = 0. add a value of u(1) so the system is nonsingular
-
-# next is mixed dirchlet and neumann
-
-# robin boundary conditions u(-1) = 0, u'(1) + \alpha u'(1) = 0
-# use scipy.optimize.brentq to validate a solution for this
-
-# next, sturm-liouville stuff
-
 def build_neumann_basis(x, n_basis):
-    # NOTE: the phi_k needs to be normalized to prevent explosion
-    #   - previous attempt of using (k ** 2 / (k + 2) ** 2 caused the values to destabilize)
-    #   - normalize
     n_points = len(x)
     theta = np.arccos(x)
     Phi = np.zeros((n_points, n_basis))
@@ -70,10 +52,40 @@ def build_neumann_basis(x, n_basis):
         Phi[:, k] = phi_k / np.linalg.norm(phi_k)   # normalize
     return Phi
 
-def build_neumann_basis_dp(x, n_basis, D):
-    Phi = build_neumann_basis(x, n_basis, D)
-    D2 = D @ D
-    return D2 @ Phi 
+def build_mixed_basis(x, n_basis):
+    # Dirichlet at x=-1, Neumann at x=1
+    n_points = len(x)
+    theta = np.arccos(x)
+    Phi = np.zeros((n_points, n_basis))
+    for k in range(n_basis):
+        b = -(k**2 + (k+1)**2) / ((k+1)**2 + (k+2)**2)
+        a = 1 + b
+        phi_k = np.cos(k*theta) + a*np.cos((k+1)*theta) + b*np.cos((k+2)*theta)
+        Phi[:, k] = phi_k / np.linalg.norm(phi_k)
+    return Phi
+
+def build_robin_basis(x, alpha, n_basis):
+    # robin boundary conditions u(-1) = 0, u'(1) + \alpha u'(1) = 0
+    n_points = len(x)
+    theta = np.arccos(x)
+    Phi = np.zeros((n_points, n_basis))
+    for k in range(n_basis):
+        M = np.array([
+            [-1, 1],
+            [((k+1)**2 + alpha), ((k+2)**2 + alpha)]
+        ])
+        V = np.array([-1, -k**2 - alpha])
+        c = np.linalg.solve(M, V)
+        a = c[0]
+        b = c[1]
+        phi_k = np.cos(k*theta) + a*np.cos((k+1)*theta) + b*np.cos((k+2)*theta)
+        Phi[:, k] = phi_k / np.linalg.norm(phi_k)
+    return Phi
+
+# robin boundary conditions u(-1) = 0, u'(1) + \alpha u'(1) = 0
+# use scipy.optimize.brentq to validate a solution for this
+
+# next, sturm-liouville stuff
 
 def clenshaw_curtis_weights(N):
     """
