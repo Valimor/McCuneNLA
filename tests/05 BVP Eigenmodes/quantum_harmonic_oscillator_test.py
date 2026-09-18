@@ -17,7 +17,7 @@ n_basis = 32
 D, x = cv.chebyshev_diff_matrix(N)
 Phi = cv.build_dirichlet_basis(x, n_basis)
 
-L = 3 # rescaled space
+L = 6 # rescaled space
 x = L * x
 D = D / L
 D2 = D @ D
