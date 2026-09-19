@@ -61,9 +61,12 @@ for step in range(max_newton_steps):
         break
 print(f"Found theta {theta:.3f} with residual {R:.3f} in {step} steps")
 
+max_r = []
+
 for step in range(max_newton_steps):
     # (a) residual, per your question 1
     R = D2 @ u + lam * np.exp(u)
+    max_r.append(np.max(np.abs(R)))
     if np.max(np.abs(R)) < tol:
         print(f"Converged in {step} Newton steps")
         print(np.max(np.abs(R)))
@@ -96,7 +99,13 @@ analytic_u = -2 * np.log(np.cosh(x * theta/2)/np.cosh(theta/2))
 print(f"Value of u at x = {x[N//2]} : {u[N // 2]}") # finding the value near 0
 
 plt.plot(x, best_u, label="Best u")
-plt.plot(x, analytic_u, label="Analytic u")
+plt.plot(x, analytic_u, label="Analytic u", linestyle="--")
 plt.title(f"Largest R: {np.max(np.abs(best_r)):.3f}")
 plt.legend()
+plt.show()
+
+plt.plot(range(len(max_r)), np.log10(np.array(max_r)))
+plt.title("Errors vs step")
+plt.xlabel("Step")
+plt.ylabel("log|Error|")
 plt.show()
