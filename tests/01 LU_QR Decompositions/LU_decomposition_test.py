@@ -81,8 +81,8 @@ for function in lu_functions:
 
 n_b_samples = 8
 for idx, n in enumerate(sizes):
-    A = scipy.linalg.hilbert(n)
-    # A = normal_distributed_random(n)
+    # A = scipy.linalg.hilbert(n)
+    A = test_matrices.normal_distributed_random(n, rng)
     # A = wilkinson_growth_matrix(n)
     b_samples = [rng.normal(size=n) for _ in range(n_b_samples)]
     for fn_idx, lu_function in enumerate(lu_functions):
@@ -94,6 +94,7 @@ for idx, n in enumerate(sizes):
             growth_error_dict[lu_function][idx] = standard_growth_error(A, U)
             reconstruction_error_dict[lu_function][idx] = lu_reconstruction_error(A, L, U, perm)
             backwards_error_dict[lu_function][idx] = lu_backwards_error(A, LU, perm, b_samples)
+            # add LAPACK backwards error
         except Exception as e:
             growth_error_dict[lu_function][idx] = np.nan
             reconstruction_error_dict[lu_function][idx] = np.nan
@@ -127,3 +128,5 @@ for ax, data_dict, ylabel, title in metric_axes:
 fig.suptitle("LU Decomposition Methods on Hilbert Matrices")
 fig.tight_layout()
 plt.show()
+
+print(np.max(backwards_error_dict[run_pivot])/np.max(backwards_error_dict[run_scipy]))
