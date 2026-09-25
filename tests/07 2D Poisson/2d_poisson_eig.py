@@ -7,7 +7,7 @@ from linalg import eigen
 
 # i might need to start doing fft for this...
 
-N = 64
+N = 128
 D, x = cv.chebyshev_diff_matrix(N)
 
 X, Y = np.meshgrid(x, x)
@@ -16,12 +16,13 @@ X, Y = np.meshgrid(x, x)
 print("Making differentiation matrices")
 Dx_2d = np.kron(np.eye(N + 1), D)
 Dy_2d = np.kron(D, np.eye(N + 1))
+print("Making Laplacian")
 L_2d = Dx_2d @ Dx_2d + Dy_2d @ Dy_2d
 
 # now, build out the basis
 # this is what it grows in!
 print("Making basis")
-n_basis = 16
+n_basis = 32
 Phi = cv.build_dirichlet_basis(x, n_basis)
 W = np.diag(cv.clenshaw_curtis_weights(N))
 
