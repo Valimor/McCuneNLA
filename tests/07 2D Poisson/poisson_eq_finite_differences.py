@@ -34,7 +34,7 @@ def solve_sylvester_fd(T, F):
 
 sylvester = True
 
-N = 256
+N = 64
 x_fd = np.linspace(-1,1,N+1)
 h = x_fd[1]-x_fd[0]
 X, Y = np.meshgrid(x_fd, x_fd)

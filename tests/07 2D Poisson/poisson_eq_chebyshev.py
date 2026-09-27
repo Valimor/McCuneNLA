@@ -13,9 +13,9 @@ def solve_sylvester_general(T, F):
     U = U_complex.real
     return U
 
-sylvester = True
+sylvester = False
 
-N = 64
+N = 128
 D, x = cv.chebyshev_diff_matrix(N)
 X, Y = np.meshgrid(x, x)
 

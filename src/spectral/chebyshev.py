@@ -82,15 +82,6 @@ def build_robin_basis(x, n_basis, alpha=0.0):
         Phi[:, k] = phi_k / np.linalg.norm(phi_k)
     return Phi
 
-# robin boundary conditions u(-1) = 0, u'(1) + \alpha u'(1) = 0
-# use scipy.optimize.brentq to validate a solution for this
-
-# next, sturm-liouville stuff
-#−(p(x)u′)′+q(x)u=λw(x)u,
-# u(±1)=0. this is dirichlet with a harder problem.
-# D @ (P @ D) @ u + Q @ u = λ W @ u
-# generalized_eign(Phi.T @ (D @ P @ D + Q) @ Phi, Phi.T @ W @ Phi)
-
 def clenshaw_curtis_weights(N):
     """
     Returns quadrature weights w (length N+1) for the Chebyshev points
